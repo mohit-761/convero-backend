@@ -13,7 +13,7 @@ export let registerSchema = z.object({
     password: z
         .string({ error: 'password is required' })
         .min(8, { error: 'password must have 8 characters' })
-        .max(8, { error: 'password cannot have more than 8 characters'}),
+        .max(8, { error: 'password cannot have more than 8 characters' }),
 
     confirm_password: z
         .string({ error: 'confirm password is required' })
@@ -24,3 +24,15 @@ export let registerSchema = z.object({
 });
 
 export type registerSchemaType = z.infer<typeof registerSchema>;
+
+export let loginSchema = z.object({
+
+    email: z.email({ error: 'please enter a valid email' }),
+
+    password: z.string({ error: 'password is required' })
+        .min(8, { error: 'password must have 8 characters' })
+        .max(8, { error: 'password cannot have more than 8 characters' })
+    
+})
+
+export type loginSchemaType = z.infer<typeof loginSchema>;

@@ -74,7 +74,7 @@ export class AuthService {
             throw new ApiError(404, 'email does not exists')
         }
 
-        if (!comparePassword(password, userExists.password)) {
+        if (!await comparePassword(password, userExists.password)) {
             throw new ApiError(404, 'invalid password please enter correct password');
         }
 

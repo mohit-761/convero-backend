@@ -1,33 +1,30 @@
-import { NextFunction, Response } from 'express';
+import { NextFunction, Response, Request } from 'express';
 import jsonwebtoken from 'jsonwebtoken';
 import { ApiError } from '../utils/ApiError';
-import { AuthRequest, UserData } from '../types/req';
+import { UserData } from '../types/user';
+import { AuthRequest } from '../types/req';
 
-export function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
+export function authenticate(req: Request, res: Response, next: NextFunction) {
 
-    let secret = process.env.SECRET;
-
-    if (!secret) throw new ApiError(400, 'secret cannot be empty');
+    let secret = process.env.SECRET!;
 
     let headers = req.headers['authorization'];
 
-    if (!headers) throw new ApiError(404, 'invalid request header');
+    let token = headers?.split(' ')[1];
 
-    let token = headers.split(' ')[1];
-
-    if (!token) throw new ApiError(404, 'please provide a token');
+    if (!token) throw new ApiError(401, 'No authentication token provided. Please log in to continue.');
 
     try {
 
         let payload = jsonwebtoken.verify(token, secret);
 
-        req.user = payload as UserData;
+        (req as AuthRequest).user = payload as UserData;
 
         next();
 
     } catch (err: any) {
 
-        throw new ApiError(404, err.message)
+        throw new ApiError(404, 'Your session has expired or is invalid. Please log in again.');
 
     }
 

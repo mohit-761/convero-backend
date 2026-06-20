@@ -1,7 +1,7 @@
 import { Document, Types } from "mongoose";
 
 export interface IUser extends Document {
-    id: Types.ObjectId,
+    _id: Types.ObjectId,
     name: string,
     email: string,
     password: string,
@@ -11,5 +11,5 @@ export interface IUser extends Document {
 }
 
 export type UserData = Pick<IUser, 'name' | 'email' | 'avatar'> & {
-    id: string;
+    _id: string;
 }
