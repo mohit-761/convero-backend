@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, response, Response } from "express";
 import { UserService } from "../service/User.service";
 import { requestHandler } from "../utils/requestHandler";
 import { ApiResponse } from "../utils/ApiResponse";
@@ -15,5 +15,10 @@ export class UserController {
     public getMe = requestHandler<AuthRequest>(async (req: AuthRequest, res: Response) => {
             let response = await this.userService.getMe(req.user);
             return res.status(200).send(new ApiResponse(200, 'user has been found', response))
+    })
+
+    public updateProfile = requestHandler<AuthRequest>(async (req: AuthRequest, res: Response) => {
+        let response = await this.userService.updateProfile(req.user, req.body);
+        return res.status(200).send(new ApiResponse(response.statusCode, response.message, response.data))
     })
 }   

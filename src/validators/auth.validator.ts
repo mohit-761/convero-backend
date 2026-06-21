@@ -16,7 +16,11 @@ export let registerSchema = z.object({
         .max(8, { error: 'password cannot have more than 8 characters' }),
 
     confirm_password: z
-        .string({ error: 'confirm password is required' })
+        .string({ error: 'confirm password is required' }),
+
+    otp: z.string({ error: 'please enter otp' })
+        .length(6, { error: 'please enter a valid otp' })
+        .optional()
 
 }).refine((data) => data.password === data.confirm_password, {
     message: 'password and confirm password must be same',
@@ -32,7 +36,7 @@ export let loginSchema = z.object({
     password: z.string({ error: 'password is required' })
         .min(8, { error: 'password must have 8 characters' })
         .max(8, { error: 'password cannot have more than 8 characters' })
-    
+
 })
 
 export type loginSchemaType = z.infer<typeof loginSchema>;

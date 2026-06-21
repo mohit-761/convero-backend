@@ -4,8 +4,8 @@ import { IUser } from "../types/user";
 const userSchema = new mongoose.Schema<IUser>({
     name: {
         type: String,
-        minLength: [3, 'name must have atleast 3 characters'],
-        maxLength: [50, 'name cannot have more than 50 characters'],
+        minLength: 3,
+        maxLength: 50,
         trim: true,
     },
     email: {

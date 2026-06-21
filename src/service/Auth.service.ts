@@ -2,18 +2,34 @@ import { User } from "../model/user.model";
 import { ApiError } from "../utils/ApiError";
 import { comparePassword, hashPassword } from "../utils/password";
 import jwt, { SignOptions } from 'jsonwebtoken';
+import { loginSchemaType, registerSchemaType } from "../validators/auth.validator";
+import { OtpService } from "./Otp.service";
 
 export class AuthService {
 
-    public async register(body: { name: string, email: string, password: string }) {
+    private otpService: OtpService;
 
-        let { name, email, password } = body;
+    constructor() {
+        this.otpService = new OtpService();
+    }
+
+    public async register(body: registerSchemaType) {
+
+        let { name, email, password, otp } = body;
 
         let userExists = await User.findOne({ email: email });
 
         if (userExists) {
             throw new ApiError(400, 'email already exists.')
         };
+
+        if (!otp) {
+
+            let code = await this.otpService.generateOtp(email, 6);
+
+            return { statusCode: 200, message: 'otp has been generate successfully.', data: { otp: code } }
+
+        } else if(!await this.otpService.verifyOtp(email, otp)) throw new ApiError(400, 'invalid otp. please try again');
 
         let hashedPassword = await hashPassword(password);
 
@@ -34,12 +50,16 @@ export class AuthService {
         let token = this.generateToken(payload);
 
         return {
-            user: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-            },
-            token: token
+            statusCode: 200,
+            message: 'user has been registered successfully',
+            data: {
+                user: {
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                },
+                token: token
+            }
         }
     }
 
@@ -64,7 +84,7 @@ export class AuthService {
         return jwt.sign(payload, secret, options);
     }
 
-    public async login(body: { email: string, password: string }) {
+    public async login(body: loginSchemaType) {
 
         let { email, password } = body;
 
