@@ -15,13 +15,27 @@ export class UserService {
         this.authService = new AuthService();
     }
 
+    async findOne(user: UserData) {
+    
+        let userExists = await User.findOne({ _id: user._id });
+
+        if(!userExists) throw new ApiError(404, 'user does not exists');
+
+        return userExists;
+
+    }
+
     async getMe(user: UserData) {
 
-        let userExists = await User.findOne({ id: user._id }).select('-password -__v').lean();
+        let userExists = await User.findOne({ _id: user._id }).select('-password -__v').lean();
 
         if (!userExists) throw new ApiError(404, 'user does not exists');
 
-        return userExists;
+      return {
+            statusCode: 200, 
+            message: 'user has been found', 
+            data: userExists,
+        };;
     }
 
     // update profile 
@@ -29,7 +43,9 @@ export class UserService {
 
         let { name, email, otp } = body;
 
-        let userExists = await this.getMe(user);
+        let userExists = await User.findOne({ _id: user._id }).select('-password -__v');
+
+        if (!userExists) throw new ApiError(404, 'user does not exists');
 
         if (email && email != userExists.email) {
 
@@ -45,29 +61,18 @@ export class UserService {
 
             }
 
-            user.email = email || user.email;
+            userExists.email = email || userExists.email;
 
         }
 
-        user.name = name || user.name;
+        userExists.name = name || userExists.name;
 
         await userExists.save();
-
-        let payload = {
-            _id: userExists._id.toString(),
-            name: userExists.name,
-            email: userExists.email,
-        }
-
-        let token = this.authService.generateToken(payload);
 
         return {
             statusCode: 200,
             message: 'profile has been updated successfully',
-            data: {
-                user: userExists,
-                token: token,
-            }
+            data: userExists
         };
 
     }

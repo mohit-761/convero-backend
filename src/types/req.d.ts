@@ -8,3 +8,5 @@ export type asyncHandlerType<T extends Request = Request> =
 export interface AuthRequest extends Request {
     user: UserData;
 }
+
+export type tokenPayloadType = { _id: string };

@@ -4,6 +4,7 @@ import { comparePassword, hashPassword } from "../utils/password";
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { loginSchemaType, registerSchemaType } from "../validators/auth.validator";
 import { OtpService } from "./Otp.service";
+import { tokenPayloadType } from "../types/req";
 
 export class AuthService {
 
@@ -31,11 +32,11 @@ export class AuthService {
 
         } else if(!await this.otpService.verifyOtp(email, otp)) throw new ApiError(400, 'invalid otp. please try again');
 
-        let hashedPassword = await hashPassword(password);
+        // let hashedPassword = await hashPassword(password);
 
         let user = new User({
             name: name,
-            password: hashedPassword,
+            password: password,
             email: email
         });
 
@@ -43,8 +44,8 @@ export class AuthService {
 
         let payload = {
             _id: user._id.toString(),
-            name: user.name,
-            email: user.email,
+            // name: user.name,
+            // email: user.email,
         }
 
         let token = this.generateToken(payload);
@@ -63,7 +64,7 @@ export class AuthService {
         }
     }
 
-    public generateToken(payload: { _id: string, name: string, email: string, avatar?: string }) {
+    public generateToken(payload: tokenPayloadType) {
 
         let secret = process.env.SECRET;
 
@@ -100,8 +101,8 @@ export class AuthService {
 
         let payload = {
             _id: userExists._id.toString(),
-            name: userExists.name,
-            email: userExists.email,
+            // name: userExists.name,
+            // email: userExists.email,
         }
 
         let token = this.generateToken(payload);

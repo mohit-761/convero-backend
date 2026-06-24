@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { IUser } from "../types/user";
+import { hashPassword } from "../utils/password";
 
 const userSchema = new mongoose.Schema<IUser>({
     name: {
@@ -32,5 +33,13 @@ const userSchema = new mongoose.Schema<IUser>({
             updatedAt: 'updated_at',
         }
     });
+
+userSchema.pre('save', async function () {
+    if (this.isModified('password')) {
+        console.log('within if');
+        this.password = await hashPassword(this.password);
+    }
+    console.log('in pre middleware');
+})
 
 export const User = mongoose.model<IUser>('User', userSchema);

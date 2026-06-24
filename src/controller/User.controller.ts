@@ -14,7 +14,7 @@ export class UserController {
 
     public getMe = requestHandler<AuthRequest>(async (req: AuthRequest, res: Response) => {
             let response = await this.userService.getMe(req.user);
-            return res.status(200).send(new ApiResponse(200, 'user has been found', response))
+            return res.status(200).send(new ApiResponse(response.statusCode, response.message, response.data))
     })
 
     public updateProfile = requestHandler<AuthRequest>(async (req: AuthRequest, res: Response) => {
