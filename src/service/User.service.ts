@@ -4,6 +4,8 @@ import { ApiError } from "../utils/ApiError";
 import { userProfileValidatorType } from "../validators/user-profile.validator";
 import { AuthService } from "./Auth.service";
 import { OtpService } from "./Otp.service";
+import fs from "fs/promises";
+import path from 'path';
 
 export class UserService {
 
@@ -16,10 +18,10 @@ export class UserService {
     }
 
     async findOne(user: UserData) {
-    
+
         let userExists = await User.findOne({ _id: user._id });
 
-        if(!userExists) throw new ApiError(404, 'user does not exists');
+        if (!userExists) throw new ApiError(404, 'user does not exists');
 
         return userExists;
 
@@ -27,15 +29,15 @@ export class UserService {
 
     async getMe(user: UserData) {
 
-        let userExists = await User.findOne({ _id: user._id }).select('-password -__v').lean();
+        let userExists = await User.findOne({ _id: user._id }).select('-password -__v');
 
         if (!userExists) throw new ApiError(404, 'user does not exists');
 
-      return {
-            statusCode: 200, 
-            message: 'user has been found', 
-            data: userExists,
-        };;
+        return {
+            statusCode: 200,
+            message: 'user has been found',
+            data: { user: userExists },
+        };
     }
 
     // update profile 
@@ -72,23 +74,33 @@ export class UserService {
         return {
             statusCode: 200,
             message: 'profile has been updated successfully',
-            data: userExists
+            data: { user: userExists }
         };
 
     }
 
 
     // update image
-    // async updateProfileImage(user: UserData, file: Express.Multer.File){
+    async updateProfileImage(user: UserData, file: Express.Multer.File) {
 
-    //     let userExists = await this.getMe(user);
+        let userExists = await User.findOne({ _id: user._id }).select('-password -__v');
 
-    //     userExists.avatar = file.filename;
+        if (!userExists) throw new ApiError(404, 'user does not exists');
 
-    //     await userExists.save();
+        if(userExists.avatar){
+           await fs.unlink(path.join(process.cwd(), userExists.avatar))
+        }
 
-    //     return userExists;
+        userExists.avatar = file.filename;
 
-    // }
+        await userExists.save();
+
+        return {
+            statusCode: 200,
+            message: 'image has been updated',
+            data: { user: userExists }
+        };
+
+    }
 
 }

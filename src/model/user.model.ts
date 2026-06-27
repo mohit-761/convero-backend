@@ -36,10 +36,26 @@ const userSchema = new mongoose.Schema<IUser>({
 
 userSchema.pre('save', async function () {
     if (this.isModified('password')) {
-        console.log('within if');
         this.password = await hashPassword(this.password);
     }
-    console.log('in pre middleware');
+    if (this.isModified('avatar')) {
+        this.avatar = `/uploads/${this.avatar}`
+    }
 })
+
+userSchema.virtual("avatar_url").get(function () {
+    if (!this.avatar) {
+        return null;
+    }
+    return `${process.env.BASE_URL}${this.avatar}`;
+});
+
+userSchema.set("toJSON", {
+    virtuals: true,
+});
+
+userSchema.set("toObject", {
+    virtuals: true,
+});
 
 export const User = mongoose.model<IUser>('User', userSchema);

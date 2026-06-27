@@ -10,7 +10,9 @@ type CbType = (error: Error | null, name: string) => void;
 
 // check file path exists or not
 if (!fs.existsSync(filePath)) {
-    fs.mkdirSync(filePath);
+    fs.mkdirSync(filePath, {
+        recursive: true
+    });
 }
 
 let storage = multer.diskStorage({
@@ -29,10 +31,10 @@ let fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilter
     if(allowedMimeTypes.includes(file.mimetype)){
         cb(null, true);
     } else {
-        throw new ApiError(404, 'invalid file type');
+        cb(new ApiError(400, "Only JPG, JPEG, PNG and SVG images are allowed."));
     }
 }
 
-export let fileUpload = multer({ storage: storage, fileFilter: fileFilter, limits: { fileSize: 10000000 }})
+export let fileUpload = multer({ storage: storage, fileFilter: fileFilter, limits: { fileSize: 10 * 1024 * 1024 }})
 
 

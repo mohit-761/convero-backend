@@ -8,10 +8,11 @@ export const validate = (schema: z.ZodType) =>
     (req: Request, res: Response, next: NextFunction) => {
 
         if (!req.body) {
-            throw new ApiError(
-                400,
-                'please enter the required values'
-            )
+            // throw new ApiError(
+            //     400,
+            //     'please enter the required values'
+            // )
+            req.body = {};
         }
 
         const result = schema.safeParse(req.body);
