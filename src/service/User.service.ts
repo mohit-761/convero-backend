@@ -1,6 +1,7 @@
 import { User } from "../model/user.model";
 import { UserData } from "../types/user";
 import { ApiError } from "../utils/ApiError";
+import { filterParamsSchemaType } from "../validators/filter-params.validator";
 import { userProfileValidatorType } from "../validators/user-profile.validator";
 import { AuthService } from "./Auth.service";
 import { OtpService } from "./Otp.service";
@@ -19,7 +20,7 @@ export class UserService {
 
     async findOne(user: UserData) {
 
-        let userExists = await User.findOne({ _id: user._id });
+        let userExists = await User.findOne({ _id: user._id }).select("+password");
 
         if (!userExists) throw new ApiError(404, 'user does not exists');
 
@@ -45,7 +46,7 @@ export class UserService {
 
         let { name, email, otp } = body;
 
-        let userExists = await User.findOne({ _id: user._id }).select('-password -__v');
+        let userExists = await User.findOne({ _id: user._id });
 
         if (!userExists) throw new ApiError(404, 'user does not exists');
 
@@ -83,12 +84,12 @@ export class UserService {
     // update image
     async updateProfileImage(user: UserData, file: Express.Multer.File) {
 
-        let userExists = await User.findOne({ _id: user._id }).select('-password -__v');
+        let userExists = await User.findOne({ _id: user._id });
 
         if (!userExists) throw new ApiError(404, 'user does not exists');
 
-        if(userExists.avatar){
-           await fs.unlink(path.join(process.cwd(), userExists.avatar))
+        if (userExists.avatar) {
+            await fs.unlink(path.join(process.cwd(), userExists.avatar))
         }
 
         userExists.avatar = file.filename;
@@ -100,6 +101,23 @@ export class UserService {
             message: 'image has been updated',
             data: { user: userExists }
         };
+
+    }
+
+    async getAllUsers(user: UserData, query: filterParamsSchemaType) {
+
+        let { page = 1, limit = 10, search = '' } = query;
+
+        let users = await User.paginate({
+            ...(search &&
+                { name: { $regex: search, $options: "i" } })
+        }, { page: page, limit: limit, sort: { created_at: -1 } });
+
+        return {
+            statusCode: 200,
+            message: 'user have been found',
+            data: users
+        }
 
     }
 

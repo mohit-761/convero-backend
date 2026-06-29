@@ -5,12 +5,14 @@ import { validate } from '../middleware/validate.middleware';
 import { userProfileValidator } from '../validators/user-profile.validator';
 import { fileUpload } from '../middleware/file-upload.middleware';
 import { requiredFile } from '../middleware/requiredFile.middleware';
+import { filterParamsSchema } from '../validators/filter-params.validator';
 
 let userRouter = Router();
 
 let userController = new UserController();
 
 userRouter.get('/me', authenticate, userController.getMe);
+userRouter.get('/all', authenticate, validate(filterParamsSchema), userController.getUsers);
 userRouter.put('/me', authenticate, validate(userProfileValidator), userController.updateProfile);
 userRouter.put('/image', authenticate, fileUpload.single('file'), requiredFile, userController.updateProfileImage);
 

@@ -1,4 +1,4 @@
-import { Request, response, Response } from "express";
+import { Request, Response } from "express";
 import { UserService } from "../service/User.service";
 import { requestHandler } from "../utils/requestHandler";
 import { ApiResponse } from "../utils/ApiResponse";
@@ -26,4 +26,9 @@ export class UserController {
         let response = await this.userService.updateProfileImage(req.user, req.file!);
         return res.status(200).send(new ApiResponse(response.statusCode, response.message, response.data));
     })
+
+    public getUsers = requestHandler<AuthRequest>(async(req: AuthRequest, res: Response) => {
+        let response = await this.userService.getAllUsers(req.user, req.query);
+        return res.status(response.statusCode).send(new ApiResponse(response.statusCode, response.message, response.data));
+    });
 }   
