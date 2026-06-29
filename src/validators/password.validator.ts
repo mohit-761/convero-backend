@@ -21,7 +21,7 @@ export let forgotPasswordSchema = z.object({
     email: z.email({ error: 'please enter a valid email' }),
 
     password: z
-        .string({ error: 'password is required' })
+        .string({ error: 'password is required and cannot be empty' })
         .min(8, { error: 'password must have atleast 8 characters' })
         .max(8, { error: 'password cannot have more than 8 characters' }),
 

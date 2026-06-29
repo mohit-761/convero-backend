@@ -1,4 +1,5 @@
 export class ApiResponse<T> {
+    // public success: number;
     public message: string;
     public statusCode: number;
     public data: T | null;
